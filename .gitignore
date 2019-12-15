@@ -1,7 +1,3 @@
-# REMOVE THIS LATER
-# omitting group_report.pdf till we get a final candidate
-group_report.pdf
-
 # So Marcos don't put garbage in our hard disks
 *.Rproj
 .DS_Store
