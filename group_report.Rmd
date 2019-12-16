@@ -342,7 +342,7 @@ The model seems to fit better the data, though there are still some data points 
 
 The data file data.csv contains information about 64 e-mails which were manually collected from DBWorld mailing list. They were classified as: 'announces of conferences' (1) and 'everything else' (0) (variable Conference)
 
-```{r q2_load_data}
+```{r q2_load_data,message=FALSE}
 
 
 
@@ -351,24 +351,117 @@ The data file data.csv contains information about 64 e-mails which were manually
 ##############################################################################
 ##                              Assignment 2
 ##############################################################################
-dataPath <- "data/data.csv"
-data <- read.csv2(dataPath)
+data<-read.csv2("data/data.csv",check.names = FALSE)
+names(data)<-iconv(names(data),to="ASCII")
+RNGversion("3.5.1")
 ```
 
 
 1. Divide data into training and test sets (70/30) without scaling. Perform nearest shrunken centroid classification of training data in which the threshold is chosen by cross-validation. Provide a centroid plot and interpret it. How many features were selected by the method? List the names of the 10 most contributing features and comment whether it is reasonable that they have strong effect on the discrimination between the conference mails and other mails? Report the test error.
 
+```{r NSC_method,echo=FALSE,warning=FALSE,results=FALSE,message=FALSE,fig.align='center',out.height='40%'}
+
+n=dim(data)[1] 
+set.seed(12345) 
+id=sample(1:n, floor(n*0.7)) 
+train=data[id,] 
+test=data[-id,]
+
+x<-t(train[,-4703])
+
+y<-train[[4703]]
+
+
+x_test<-t(test[,-4703])
+
+y_test<-test[[4703]]
+
+my_data<-list(x=x,y=as.factor(y),geneid=as.character(1:nrow(x)),genenames=rownames(x))
+my_data_test<-list(x=x_test,y=as.factor(y_test),geneid=as.character(1:nrow(x_test)),genenames=rownames(x_test))
+
+mod<-pamr.train(my_data,threshold = seq(0,4,0.1))
+cvmodel<-pamr.cv(mod,my_data)
+
+thr<-cvmodel$threshold[which.min(cvmodel$error)]
+pamr.plotcv(cvmodel)
+pred<-pamr.predict(mod,my_data_test$x,threshold = thr,type="class")
+pamr.plotcen(mod,my_data,thr)
+
+#res<-as.data.frame(pamr.listgenes(mod,my_data,thr,genenames = TRUE))
+#listgene
+#my_data$genenames[as.numeric(listgene)]
+
+```
+
+We get the threshold is 1.3 with using cross-validation. From the centroid plot we can see the contribution of each word made to the result(conference or not). There are 693 features selected in total. The 10 most contributing features are "papers", "important", "submission", "due", "published", "position", "call", "conference", "dates", "candidates". It's clear that these word have a strong connection to conference. The test error is 5%.
 2. Compute the test error and the number of the contributing features for the following methods fitted to the training data:
 
 a. Elastic net with the binomial response and $\alpha=0.5$ in which penalty is selected by the cross-validation
 
+```{r Elastic,echo=FALSE,message=FALSE,fig.align='center',out.height='40%'}
+library(glmnet)
+
+x<-train[,-4703]
+y<-train[[4703]]
+
+x_test<-test[,-4703]
+y_test<-test[[4703]]
+
+mod<-cv.glmnet(as.matrix(x),y,alpha=0.5,family="binomial")
+plot(mod)
+penalty_min<-mod$lambda.min
+real_mod<-glmnet(as.matrix(x),y,alpha=0.5,lambda = penalty_min,family="binomial")
+pred<-predict(real_mod,as.matrix(x_test),type="class")
+cft<-table(pred,y_test)
+mis_rate<-1-(cft[1,1]+cft[2,2])/sum(cft)
+cat(mis_rate*100,"%")
+```
+
 b. Support vector machine with “vanilladot” kernel.
+
+```{r SVM,echo=FALSE,message=FALSE}
+fit<-ksvm(as.matrix(x),y,data=train,kernel="vanilladot",type="C-svc",scale=FALSE)
+pred<-predict(fit,x_test,type="response")
+
+cft<-table(pred,y_test)
+
+mis_rate<-1-(cft[1,1]+cft[2,2])/sum(cft)
+cat(mis_rate*100,"%")
+```
 
 Compare the results of these models with the results of the nearest shrunken centroids (make a comparative table). Which model would you prefer and why?
 
+Error rate for Elastic net is 10% and for SVM is 5%. In this case we prefer to use SVM since it ignores the effect of high-dimensional data and it provides the lowest misclassfication rate.
+
 3. Implement Benjamini-Hochberg method for the original data, and use t.test() for computing p-values. Which features correspond to the rejected hypotheses? Interpret the result.
 
+```{r BH,echo=FALSE,fig.align='center',out.height='40%'}
+x=as.matrix(data[,-4703])
+y=as.factor(data[[4703]])
 
+df<-data.frame(name=c(),pvalue=c())
+
+for(i in 1:ncol(x)){
+  tmpv<-t.test(x[,i]~y,alternative="two.sided",conf.level=0.95)$p.value
+  tdf<-data.frame(name=colnames(x)[i],pvalue=tmpv)
+  df<-rbind(df,tdf)
+}
+df<-df[order(df$pvalue),] 
+
+a=0.05
+max_i=1
+for(i in 1:length(df$pvalue)){
+  if(df$pvalue[i]<=a*i/length(df$pvalue)){
+    max_i=i
+  }
+}
+ggplot()+geom_point(aes(x=c(1:length(df$pvalue)),y=df$pvalue),col="red")+geom_vline(xintercept = 39)
+print(max_i)
+
+df[1:39,]
+```
+
+There are 39 features correspond to the rejected hypotheses with $\alpha=0.05$. 
 
 
 
