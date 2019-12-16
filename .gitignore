@@ -1,3 +1,5 @@
+*.pdf
+
 # So Marcos don't put garbage in our hard disks
 *.Rproj
 .DS_Store
