@@ -149,6 +149,8 @@ Thus as the summary states that the model family is Gaussian, it can be said tha
 $$Mortality \sim Year + spline(Week)$$
 $$Mortality \sim N(\mu=1783.765, \sigma=25981.62) $$
 
+
+\newpage
 The smoother curve approximated by the GAM model is:
 
 ```{r q1_gam_plot_model, fig.align='center', out.height='40%', q1=TRUE}
@@ -156,7 +158,6 @@ plot(model, main="Smooth Approximation of Mortality")
 ```
 
 
-\newpage
 3. Plot predicted and observed mortality against time for the fitted model and comment on the quality of the fit. Investigate the output of the GAM model and report which terms appear to be significant in the model. Is there a trend in mortality change from one year to another? Plot the spline component and interpret the plot.
 
 ```{r q1_predictions, fig.align='center', out.height='40%', q1=TRUE}
