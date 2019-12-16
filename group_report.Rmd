@@ -409,6 +409,7 @@ pamr.plotcen(mod,my_data,thr)
 ```
 
 We get the threshold is 1.3 with using cross-validation. From the centroid plot we can see the contribution of each word made to the result(conference or not). There are 693 features selected in total. The 10 most contributing features are "papers", "important", "submission", "due", "published", "position", "call", "conference", "dates", "candidates". It's clear that these word have a strong connection to conference. The test error is 5%.
+
 2. Compute the test error and the number of the contributing features for the following methods fitted to the training data:
 
 a. Elastic net with the binomial response and $\alpha=0.5$ in which penalty is selected by the cross-validation
@@ -476,7 +477,17 @@ print(max_i)
 df[1:39,]
 ```
 
-There are 39 features correspond to the rejected hypotheses with $\alpha=0.05$. 
+There are 39 features correspond to the rejected hypotheses with $\alpha=0.05$.
+
+We are testing:
+
+$H_0,j$: word j has no effect on classification.
+
+$H_1,j$: word j has effect on classification.
+
+The variables correspondent to the rejected NULL hypothesis, therefore, are the ones that are significant to the classification as conference mail.
+
+The 39 words selected are significant and are ranked in order of importance, similarly to what can be seen in the centroid plot from item 1.
 
 
 
