@@ -268,7 +268,7 @@ ggplot() +
 
 ```
 
-Extracting the degrees of freedom from each penalization iteration it can be seen that the lower the penalization the more relaxed is the model, thus, the higher the degrees of freedom. 
+Extracting the degrees of freedom from each penalization iteration it can be seen that the lower the penalization the more relaxed is the model, thus, the higher the degrees of freedom. The penalty factor is inversely proportional to the degrees of freedom. Indeed, by looking at the above plots, this relationship is confirmed. A high penalty essentialy drops a higher number of parameters in the linear smoother matrix $S_\lambda$ (by approximating them to zero).
 
 5. Use the model obtained in step 2 and plot the residuals and the influenza values against time (in one plot). Is the temporal pattern in the residuals correlated to the outbreaks of influenza?
 
