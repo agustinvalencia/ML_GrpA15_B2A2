@@ -131,16 +131,33 @@ The summary of the obtained probabilistic model is:
 
 ```{r q1_gam_summary, q1=TRUE}
 summary(model)
+modelMean <- mean(model$y)
+modelVar <- var(model$y)
 ```
 
-The smoothed curve approximated by the GAM model is:
+The model Mean and variance are : 
+
+```{r q1_gam_prob_model, q1=TRUE}
+print("Train predictions mean:")
+modelMean
+print("Train predictions variance:")
+modelVar
+```
+
+Thus as the summary states that the model family is Gaussian, it can be said that :
+
+$$Mortality \sim Year + spline(Week)$$
+$$Mortality \sim N(\mu=1783.765, \sigma=25981.62) $$
+
+
+\newpage
+The smoother curve approximated by the GAM model is:
 
 ```{r q1_gam_plot_model, fig.align='center', out.height='40%', q1=TRUE}
 plot(model, main="Smooth Approximation of Mortality")
 ```
 
 
-\newpage
 3. Plot predicted and observed mortality against time for the fitted model and comment on the quality of the fit. Investigate the output of the GAM model and report which terms appear to be significant in the model. Is there a trend in mortality change from one year to another? Plot the spline component and interpret the plot.
 
 ```{r q1_predictions, fig.align='center', out.height='40%', q1=TRUE}
@@ -154,7 +171,6 @@ ggplot(data) +
 ```
 
 Although it seems to be a fair general approximation it seems to be missing some abnormal positive and negative peaks.
-
 
 
 
@@ -198,7 +214,7 @@ p <- p + ylab("Mortality")
 p
 ```
 
-It can be seen that given the variability of mortality per week each year, the GAM fit acceptably well the data, though still too general, thus not as good as we would likr to.
+It can be seen that given the variability of mortality per week each year, the GAM fit acceptably well the data, though still too general, thus not as good as we would like to.
 
 The 10 most significant terms in the model are:
 
@@ -252,7 +268,6 @@ ggplot(df) +
     ggtitle("Effects of variations on SP penalization on Spline training") +
     xlab("Time") + ylab("Mortality")
 
-
 ```
 
 It can be seen that the lower the penalty the better the fit. In this case it looks good to have such a low penalty, though in other cases it might overfit the data.
@@ -282,7 +297,7 @@ model <- gam (
                 s(Week, k = length(unique(data$Week))), 
                 data=data,
                 method = "GCV.Cp"
-             )
+              )
 ggplot(data) +
     geom_point(aes(x=Time, y=Influenza, color="Influenza")) +
     geom_line(aes(x=Time, y=model$residuals, color="Residuals")) +
