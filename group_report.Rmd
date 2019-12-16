@@ -357,7 +357,7 @@ The model seems to fit better the data, though there are still some data points 
 
 The data file data.csv contains information about 64 e-mails which were manually collected from DBWorld mailing list. They were classified as: 'announces of conferences' (1) and 'everything else' (0) (variable Conference)
 
-```{r q2_load_data,message=FALSE, q2 = TRUE}
+```{r q2_load_data,message=FALSE,warning=FALSE,message=FALSE, q2 = TRUE}
 
 
 
@@ -402,13 +402,16 @@ pamr.plotcv(cvmodel)
 pred<-pamr.predict(mod,my_data_test$x,threshold = thr,type="class")
 pamr.plotcen(mod,my_data,thr)
 
+#pamr.listgenes(mod,my_data,thr,genenames = TRUE)[1:10,]
 #res<-as.data.frame(pamr.listgenes(mod,my_data,thr,genenames = TRUE))
+
 #listgene
 #my_data$genenames[as.numeric(listgene)]
 
 ```
 
-We get the threshold is 1.3 with using cross-validation. From the centroid plot we can see the contribution of each word made to the result(conference or not). There are 693 features selected in total. The 10 most contributing features are "papers", "important", "submission", "due", "published", "position", "call", "conference", "dates", "candidates". It's clear that these word have a strong connection to conference. The test error is 5%.
+We get the threshold is 1.3 with using cross-validation. From the centroid plot we can see the contribution of each word made to the result(conference or not). There are 231 features selected in total. The 10 most contributing features are "papers", "important", "submission", "due", "published", "position", "call", "conference", "dates", "candidates". It's clear that these word have a strong connection to conference. The test error is 5%.
+
 2. Compute the test error and the number of the contributing features for the following methods fitted to the training data:
 
 a. Elastic net with the binomial response and $\alpha=0.5$ in which penalty is selected by the cross-validation
@@ -427,6 +430,12 @@ plot(mod)
 penalty_min<-mod$lambda.min
 real_mod<-glmnet(as.matrix(x),y,alpha=0.5,lambda = penalty_min,family="binomial")
 pred<-predict(real_mod,as.matrix(x_test),type="class")
+
+coeffs <- coef(mod)
+nonzeroCoeffs <- coeffs[which(coeffs != 0)]
+selectedCoeffs <- length(nonzeroCoeffs)
+cat("Elasticnet model has ", selectedCoeffs, " nonzero coefficients\n")
+
 cft<-table(pred,y_test)
 mis_rate<-1-(cft[1,1]+cft[2,2])/sum(cft)
 cat(mis_rate*100,"%")
@@ -476,7 +485,7 @@ print(max_i)
 df[1:39,]
 ```
 
-There are 39 features correspond to the rejected hypotheses with $\alpha=0.05$. 
+There are 39 features correspond to the rejected hypotheses with $\alpha=0.05$. Apperently these 39 words have correlation to the conference.
 
 
 
